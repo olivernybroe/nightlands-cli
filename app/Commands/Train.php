@@ -65,6 +65,6 @@ class Train extends Command
             $amount,
         );
 
-        $this->info("{$amount} Units was successfully queued up for training!");
+        $this->userInfo($user, "{$amount} Units was successfully queued up for training!");
     }
 }

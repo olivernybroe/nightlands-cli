@@ -48,4 +48,14 @@ abstract class Command extends BaseCommand
             resource_path('icon.png')
         ]);
     }
+
+    protected function userNotify(User $user, string $description): void
+    {
+        $this->notify("\[{$user->getDisplayName()}] \n{$description}");
+    }
+
+    protected function userInfo(User $user, string $description): void
+    {
+        $this->info("[{$user->getDisplayName()}] {$description}");
+    }
 }

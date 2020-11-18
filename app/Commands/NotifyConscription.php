@@ -23,7 +23,8 @@ class NotifyConscription extends Command
 
         $users->each(function (User $user) {
             Log::info("Conscription notification send.");
-            $this->notify(
+            $this->userNotify(
+                $user,
                 "Conscription upgrade finishes at {$user->conscription_upgrade_finished_at->format('H:i:s')}."
             );
         });
