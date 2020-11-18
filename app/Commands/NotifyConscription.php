@@ -16,6 +16,7 @@ class NotifyConscription extends Command
     public function handle()
     {
         $users = User::query()
+            ->whereDate('conscription_upgrade_finished_at', Carbon::now())
             ->whereTime('conscription_upgrade_finished_at', '>', Carbon::now())
             ->whereTime('conscription_upgrade_finished_at', '<', Carbon::now()->addMinutes(1))
             ->get();
