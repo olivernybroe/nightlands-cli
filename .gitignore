@@ -1,0 +1,9 @@
+/vendor
+/.idea
+/.vscode
+/.vagrant
+.phpunit.result.cache
+/database/database.sqlite
+.env
+.editorconfig
+schema.graphql
