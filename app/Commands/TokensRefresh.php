@@ -27,6 +27,7 @@ class TokensRefresh extends Command
         });
 
         $this->output->progressFinish();
+        $this->notify("Refreshed all tokens.");
     }
 
     public function schedule(Schedule $schedule): void
