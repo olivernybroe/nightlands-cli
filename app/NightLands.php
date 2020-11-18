@@ -25,4 +25,16 @@ class NightLands
         app(Client::class)->setToken($token);
         return app(Units::class);
     }
+
+    public function resources(string $token): Resources
+    {
+        app(Client::class)->setToken($token);
+        return app(Resources::class);
+    }
+
+    public function conscription(string $token): Conscription
+    {
+        app(Client::class)->setToken($token);
+        return app(Conscription::class);
+    }
 }

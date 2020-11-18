@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $username
  * @property string      $password
  * @property string|null $last_issued_token
+ * @property Carbon|null $conscription_upgrade_finished_at
  */
 class User extends Model
 {
@@ -17,6 +19,7 @@ class User extends Model
         'password',
         'last_issued_token',
         'username',
+        'conscription_upgrade_finished_at'
     ];
 
     protected $hidden = [
@@ -26,6 +29,10 @@ class User extends Model
 
     protected $casts = [
         'password' => Encrypt::class,
+    ];
+
+    protected $dates = [
+        'conscription_upgrade_finished_at',
     ];
 
     public function getDisplayName(): string

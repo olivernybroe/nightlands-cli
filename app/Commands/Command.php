@@ -39,4 +39,13 @@ abstract class Command extends BaseCommand
             ->pluck('last_issued_token')
             ->first();
     }
+
+    protected function notify(string $description): void
+    {
+        $this->__call('notify', [
+            "Nightlands CLI",
+            $description,
+            resource_path('icon.png')
+        ]);
+    }
 }

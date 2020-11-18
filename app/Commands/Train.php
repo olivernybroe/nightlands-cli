@@ -21,13 +21,9 @@ class Train extends Command
 
         $users = $this->selectUsers();
         $unit = $this->selectUnit();
-        $amount = $this->ask('How many?', 1);
+        $amount = $this->selectAmount();
 
-        $users->each(fn(User $user) => $this->nightlands->units($user->getLastIssuedToken())->train(
-            $unit,
-            $amount,
-        ));
-        $this->info("Units was successfully queued up for training!");
+        $users->each(fn(User $user) => $this->train($user, $unit, $amount));
     }
 
     public function schedule(Schedule $schedule): void
@@ -50,5 +46,25 @@ class Train extends Command
         );
 
         return $units->where('name', Str::title($chosen))->pluck('id')->first();
+    }
+
+    private function selectAmount(): int
+    {
+        return $this->ask('How many? (0=all) ', 0);
+    }
+
+    private function train(User $user, int $unit, int $amount): void
+    {
+        if ($amount === 0) {
+            $response = $this->nightlands->resources($user->getLastIssuedToken())->get();
+            $amount = $response->getCitizens();
+        }
+
+        $this->nightlands->units($user->getLastIssuedToken())->train(
+            $unit,
+            $amount,
+        );
+
+        $this->info("{$amount} Units was successfully queued up for training!");
     }
 }
