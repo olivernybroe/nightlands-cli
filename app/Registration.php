@@ -30,4 +30,26 @@ class Registration
             ],
         );
     }
+
+    public function setupUsername(string $token, string $username): Response
+    {
+        $this->client->setToken($token);
+
+        return $this->client->mutate(
+        /** @lang GraphQL */ <<<'GQL'
+            mutation SetupUsername($username: String!) {
+              setupUsername(
+                input: {
+                  username: $username
+                }
+              ) {
+                username
+              }
+            }
+            GQL,
+            [
+                'username' => $username,
+            ],
+        );
+    }
 }

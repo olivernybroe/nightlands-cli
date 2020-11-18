@@ -19,10 +19,16 @@ class Register extends Command
             $password = $this->ask("Enter password")
         );
 
+        $token = $nightLands->authentication()->logIn(
+            $email,
+            $password
+        )->getToken();
+
         if ($this->confirm("Save user in the database? (password is encrypted, not hashed)", true)) {
             User::query()->create([
                 'email' => $email,
                 'password' => $password,
+                'last_issued_token' => $token
             ]);
         }
 
