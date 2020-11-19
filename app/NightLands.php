@@ -37,4 +37,10 @@ class NightLands
         app(Client::class)->setToken($token);
         return app(Conscription::class);
     }
+
+    public function battle(string $token): Battle
+    {
+        app(Client::class)->setToken($token);
+        return app(Battle::class);
+    }
 }
