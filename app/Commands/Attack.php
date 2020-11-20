@@ -2,13 +2,13 @@
 
 namespace App\Commands;
 
+use App\Exceptions\RequestFailed;
 use App\NightLands;
 use App\Rank;
 use App\Responses\Casualty;
 use App\User;
-use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Collection;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableSeparator;
 
 class Attack extends Command
 {
@@ -32,40 +32,31 @@ class Attack extends Command
 
         $this->info("Attacking {$attack->getName()} [id:{$attack->getKey()}] [rank:{$attack->getRank()}]");
 
-        $users->each(function (User $user) use ($nightLands) {
-            $response = $nightLands->battle($user->getLastIssuedToken())->attack(37);
+        $casualties = $users->map(function (User $user) use ($nightLands, $attack) {
+            try {
+                $response = $nightLands->battle($user->getLastIssuedToken())->attack($attack->getKey());
+            } catch (RequestFailed $exception) {
+                dump($exception->getErrors());
+                $this->userInfo($user, "Failed attacking.");
+                return null;
+            }
 
-            $table = new Table($this->output);
+            $this->userInfo($user, "Successfully attacked!");
 
-            $defenderCasualties = collect($response->defenderCasualties())->map(fn(Casualty $casualty) => [
-                $casualty->getName(),
-                $casualty->getKilled(),
-                $casualty->getInitial()
+            return collect($response->defenderCasualties());
+        })->filter()
+            ->flatten(1)
+            ->groupBy->getName()
+            ->map(fn(Collection $unitCasualties) => [
+                optional($unitCasualties->first())->getName(),
+                $unitCasualties->sum(fn(Casualty $casualty) => $casualty->getKilled())
             ]);
 
-            $attackerCasualties = collect($response->attackerCasualties())->map(fn(Casualty $casualty) => [
-                $casualty->getName(),
-                $casualty->getKilled(),
-                $casualty->getInitial()
-            ]);
+        $table = new Table($this->output);
 
-            $table->setHeaderTitle($user->getDisplayName())
-                ->setHeaders(['Unit', 'Killed', 'Initial'])
-                ->addRows($defenderCasualties->all())
-                ->addRow(new TableSeparator())
-                ->addRows($attackerCasualties->all());
-            $table->render();
-        });
-    }
-
-    /**
-     * Define the command's schedule.
-     *
-     * @param  \Illuminate\Console\Scheduling\Schedule $schedule
-     * @return void
-     */
-    public function schedule(Schedule $schedule): void
-    {
-        // $schedule->command(static::class)->everyMinute();
+        $table->setHeaderTitle($attack->getName())
+            ->setHeaders(['Unit', 'Killed'])
+            ->addRows($casualties->all());
+        $table->render();
     }
 }

@@ -55,6 +55,6 @@ class Scoreboard extends Command
      */
     public function schedule(Schedule $schedule): void
     {
-        // $schedule->command(static::class)->everyMinute();
+        $schedule->command(static::class)->everyTwoHours();
     }
 }

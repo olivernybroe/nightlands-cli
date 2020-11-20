@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Exceptions\RequestFailed;
 use App\NightLands;
 use App\User;
 
@@ -16,7 +17,13 @@ class ResearchConscription extends Command
         $users = $this->selectUsers();
 
         $users->each(function (User $user) use ($nightLands) {
-            $response = $nightLands->conscription($user->getLastIssuedToken())->research();
+            try {
+                $response = $nightLands->conscription($user->getLastIssuedToken())->research();
+            } catch (RequestFailed $exception) {
+                $this->userInfo($user, "Failed researching next conscription level.");
+                return;
+            }
+
             $user->update([
                 'conscription_upgrade_finished_at' => $response->upgradeFinishedAt(),
             ]);

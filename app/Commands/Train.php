@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Exceptions\RequestFailed;
 use App\NightLands;
 use App\User;
 use Illuminate\Console\Scheduling\Schedule;
@@ -55,16 +56,30 @@ class Train extends Command
 
     private function train(User $user, int $unit, int $amount): void
     {
-        if ($amount === 0) {
-            $response = $this->nightlands->resources($user->getLastIssuedToken())->get();
-            $amount = $response->getCitizens();
+        $response = $this->nightlands->resources($user->getLastIssuedToken())->get();
+        $citizens = $response->getCitizens();
+
+        $amount = $amount === 0 ? $citizens : $amount;
+
+        if ($citizens === 0) {
+            $this->userInfo($user, "No citizens to train.");
+            return;
         }
 
-        $this->nightlands->units($user->getLastIssuedToken())->train(
-            $unit,
-            $amount,
-        );
+        if ($amount > $citizens) {
+            $amount = $citizens;
+        }
 
-        $this->userInfo($user, "{$amount} Units was successfully queued up for training!");
+        try {
+            $this->nightlands->units($user->getLastIssuedToken())->train(
+                $unit,
+                $amount,
+            );
+
+            $this->userInfo($user, "{$amount} Units was successfully queued up for training!");
+        } catch (RequestFailed $exception) {
+            dump($exception);
+            $this->userInfo($user, "Failed training {$amount}.");
+        }
     }
 }

@@ -43,4 +43,10 @@ class NightLands
         app(Client::class)->setToken($token);
         return app(Battle::class);
     }
+
+    public function items(string $token): Items
+    {
+        app(Client::class)->setToken($token);
+        return app(Items::class);
+    }
 }
