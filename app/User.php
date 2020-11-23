@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string      $password
  * @property string|null $last_issued_token
  * @property Carbon|null $conscription_upgrade_finished_at
+ * @property int|null conscription_level
  */
 class User extends Model
 {
@@ -19,7 +20,8 @@ class User extends Model
         'password',
         'last_issued_token',
         'username',
-        'conscription_upgrade_finished_at'
+        'conscription_upgrade_finished_at',
+        'conscription_level',
     ];
 
     protected $hidden = [

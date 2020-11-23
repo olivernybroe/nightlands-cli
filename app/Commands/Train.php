@@ -29,7 +29,7 @@ class Train extends Command
 
     public function schedule(Schedule $schedule): void
     {
-        // $schedule->command(static::class)->everyMinute();
+        $schedule->command(static::class)->hourly();
     }
 
     private function selectUnit(): int
@@ -43,7 +43,8 @@ class Train extends Command
 
         $chosen = $this->choice(
             "Choose a unit",
-            $choices->all()
+            $choices->all(),
+            "gold miner",
         );
 
         return $units->where('name', Str::title($chosen))->pluck('id')->first();
@@ -76,7 +77,7 @@ class Train extends Command
                 $amount,
             );
 
-            $this->userInfo($user, "{$amount} Units was successfully queued up for training!");
+            $this->userNotify($user, "{$amount} Units was successfully queued up for training!");
         } catch (RequestFailed $exception) {
             dump($exception);
             $this->userInfo($user, "Failed training {$amount}.");

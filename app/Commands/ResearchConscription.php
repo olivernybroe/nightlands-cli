@@ -3,8 +3,10 @@
 namespace App\Commands;
 
 use App\Exceptions\RequestFailed;
+use App\MetaInfo;
 use App\NightLands;
 use App\User;
+use Illuminate\Console\Scheduling\Schedule;
 
 class ResearchConscription extends Command
 {
@@ -14,7 +16,14 @@ class ResearchConscription extends Command
 
     public function handle(NightLands $nightLands): void
     {
-        $users = $this->selectUsers();
+        $users = $this->selectUsers(
+            User::query()->where(
+                'conscription_level',
+                '<',
+                (int) MetaInfo::maxConscriptionLevel()->value
+            )->orWhereNull('conscription_level')
+            ->get()
+        );
 
         $users->each(function (User $user) use ($nightLands) {
             try {
@@ -26,10 +35,21 @@ class ResearchConscription extends Command
 
             $user->update([
                 'conscription_upgrade_finished_at' => $response->upgradeFinishedAt(),
+                'conscription_level' => $response->nextLevel(),
             ]);
 
-            $this->info("Upgrading to level {$response->nextLevel()}.");
-            $this->info("Finished at: {$response->upgradeFinishedAt()->toDateTimeString()}.");
+            $this->userNotify(
+                $user,
+                <<<TXT
+                    Upgrading to level {$response->nextLevel()}.
+                    "Finished at: {$response->upgradeFinishedAt()->toDateTimeString()}.
+                    TXT
+            );
         });
+    }
+
+    public function schedule(Schedule $schedule): void
+    {
+        $schedule->command(static::class)->hourly();
     }
 }

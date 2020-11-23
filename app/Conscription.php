@@ -33,4 +33,34 @@ class Conscription
 
         return ConscriptionResponse::fromResponse($response);
     }
+
+    public function list(): Response
+    {
+        return $this->client->mutate(
+        /** @lang GraphQL */ <<<'GQL'
+            query {
+              conscriptionLevels {
+                level
+                name
+                cost
+              }
+            }
+            GQL,
+        );
+    }
+
+    public function get(): Response
+    {
+        return $this->client->mutate(
+        /** @lang GraphQL */ <<<'GQL'
+            query {
+              me {
+                conscription {
+                    level
+                }
+              }
+            }
+            GQL,
+        );
+    }
 }
