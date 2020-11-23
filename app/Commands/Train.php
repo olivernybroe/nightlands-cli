@@ -29,7 +29,7 @@ class Train extends Command
 
     public function schedule(Schedule $schedule): void
     {
-        $schedule->command(static::class)->hourly();
+        $schedule->command(static::class)->hourlyAt(5);
     }
 
     private function selectUnit(): int

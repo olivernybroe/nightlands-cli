@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Exceptions\RequestFailed;
+use App\MetaInfo;
 use App\NightLands;
 use App\User;
 use Illuminate\Console\Scheduling\Schedule;
@@ -10,13 +11,17 @@ use Illuminate\Support\Str;
 
 class BuyItems extends Command
 {
-    protected $signature = 'items:buy';
+    protected $signature = 'items:buy {--user=*} {--only-max-conscription}';
 
     protected $description = 'Buy items in the store';
 
     public function handle(NightLands $nightLands): void
     {
-        $users = $this->selectUsers();
+        $userQuery = $this->option('only-max-conscription')
+            ? User::query()->where('conscription_level', '>=', MetaInfo::maxConscriptionLevel()->value)->get()
+            : User::all();
+
+        $users = $this->selectUsers($userQuery);
         $item = $this->selectItem($nightLands);
         $amount = $this->selectAmount();
 
@@ -47,7 +52,7 @@ class BuyItems extends Command
                 $amount,
             );
 
-            $this->userInfo($user, "{$amount} items was successfully bought!");
+            $this->userNotify($user, "{$amount} of {$item['name']} was successfully bought!");
         } catch (RequestFailed $exception) {
             dump($exception);
             $this->userInfo($user, "Failed buying {$amount}.");
@@ -66,7 +71,8 @@ class BuyItems extends Command
 
         $chosen = $this->choice(
             "Choose a item",
-            $choices->all()
+            $choices->all(),
+            'id:11'
         );
 
         return $items->firstWhere('id', Str::after($chosen, 'id:'));
@@ -85,6 +91,9 @@ class BuyItems extends Command
      */
     public function schedule(Schedule $schedule): void
     {
-        // $schedule->command(static::class)->everyMinute();
+        $schedule->command(
+            static::class,
+            ['--only-max-conscription']
+        )->everyThirtyMinutes();
     }
 }

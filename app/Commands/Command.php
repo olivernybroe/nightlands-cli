@@ -4,12 +4,17 @@ namespace App\Commands;
 
 use App\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use LaravelZero\Framework\Commands\Command as BaseCommand;
 
 abstract class Command extends BaseCommand
 {
     protected function selectUsers(Collection $users = null, string $question = 'Select user'): Collection
     {
+        if ($this->hasOption('user') && ($selected = $this->option('user')) !== []) {
+            return User::query()->whereKey($selected)->get();
+        }
+
         $users = $users ?? User::all();
 
         $choices = $users->collect()
@@ -51,6 +56,7 @@ abstract class Command extends BaseCommand
 
     protected function userNotify(User $user, string $description): void
     {
+        Log::info("User notification send! [$description]");
         $this->notify("\[{$user->getDisplayName()}] \n{$description}");
     }
 
