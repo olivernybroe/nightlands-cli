@@ -57,7 +57,7 @@ abstract class Command extends BaseCommand
     protected function userNotify(User $user, string $description): void
     {
         Log::info("User notification send! [$description]");
-        $this->notify("\[{$user->getDisplayName()}] \n{$description}");
+        $this->notify("{$user->getDisplayName()}: \n{$description}");
     }
 
     protected function userInfo(User $user, string $description): void

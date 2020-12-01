@@ -52,7 +52,7 @@ class BuyItems extends Command
                 $amount,
             );
 
-            $this->userNotify($user, "{$amount} of {$item['name']} was successfully bought!");
+            $this->userInfo($user, "{$amount} of {$item['name']} bought.");
         } catch (RequestFailed $exception) {
             dump($exception);
             $this->userInfo($user, "Failed buying {$amount}.");

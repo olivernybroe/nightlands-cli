@@ -32,6 +32,6 @@ class TokensRefresh extends Command
 
     public function schedule(Schedule $schedule): void
     {
-        $schedule->command(static::class)->daily();
+        $schedule->command(static::class)->twiceDaily();
     }
 }

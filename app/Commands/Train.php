@@ -77,7 +77,7 @@ class Train extends Command
                 $amount,
             );
 
-            $this->userNotify($user, "{$amount} Units was successfully queued up for training!");
+            $this->userInfo($user, "{$amount} Units queued for training!");
         } catch (RequestFailed $exception) {
             dump($exception);
             $this->userInfo($user, "Failed training {$amount}.");

@@ -7,6 +7,7 @@ use App\NightLands;
 use App\Rank;
 use App\Responses\Casualty;
 use App\User;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Collection;
 use Symfony\Component\Console\Helper\Table;
 
@@ -26,13 +27,15 @@ class Attack extends Command
             ->keyBy->getRank()
             ->map->getName()
             ->all(),
+            Rank::query()->orderBy('rank')->first()->name
         );
         /** @var Rank $attack */
         $attack = Rank::query()->where('name', $attack)->first();
 
         $this->info("Attacking {$attack->getName()} [id:{$attack->getKey()}] [rank:{$attack->getRank()}]");
 
-        $casualties = $users->map(function (User $user) use ($nightLands, $attack) {
+        $goldStolen = 0;
+        $casualties = $users->map(function (User $user) use ($nightLands, $attack, &$goldStolen) {
             try {
                 $response = $nightLands->battle($user->getLastIssuedToken())->attack($attack->getKey());
             } catch (RequestFailed $exception) {
@@ -43,6 +46,7 @@ class Attack extends Command
 
             $this->userInfo($user, "Successfully attacked!");
 
+            $goldStolen += $response->goldStolen();
             return collect($response->defenderCasualties());
         })->filter()
             ->flatten(1)
@@ -54,9 +58,15 @@ class Attack extends Command
 
         $table = new Table($this->output);
 
+        $this->info("Stole $goldStolen gold.");
         $table->setHeaderTitle($attack->getName())
             ->setHeaders(['Unit', 'Killed'])
             ->addRows($casualties->all());
         $table->render();
+    }
+
+    public function schedule(Schedule $schedule): void
+    {
+        // $schedule->command(static::class)->everyFourHours();
     }
 }

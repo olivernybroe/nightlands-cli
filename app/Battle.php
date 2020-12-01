@@ -41,6 +41,7 @@ class Battle
                     initial_quantity
                   }
                 }
+                gold_stolen
               }
             }
             GQL,

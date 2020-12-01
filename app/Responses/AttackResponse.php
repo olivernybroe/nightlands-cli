@@ -35,4 +35,9 @@ class AttackResponse extends Response
                 $casualty['pivot']['quantity'],
             ))->all();
     }
+
+    public function goldStolen(): int
+    {
+        return $this->getData()['actionBattle']['gold_stolen'] ?? 0;
+    }
 }
