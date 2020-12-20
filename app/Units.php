@@ -25,6 +25,11 @@ class Units
                 name
                 category
                 type
+                items {
+                  id
+                  name
+                  price
+                }
               }
             }
             GQL,

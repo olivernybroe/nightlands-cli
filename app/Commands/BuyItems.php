@@ -94,6 +94,6 @@ class BuyItems extends Command
         $schedule->command(
             static::class,
             ['--only-max-conscription']
-        )->everyThirtyMinutes();
+        )->hourlyAt(10);
     }
 }

@@ -32,7 +32,7 @@ class Train extends Command
         $schedule->command(static::class)->hourlyAt(5);
     }
 
-    private function selectUnit(): int
+    private function selectUnit(): array
     {
         $token = $this->getFirstToken();
         $units = collect($this->nightlands->units($token)->get()->getUnits());
@@ -44,10 +44,10 @@ class Train extends Command
         $chosen = $this->choice(
             "Choose a unit",
             $choices->all(),
-            "gold miner",
+            "crossbowman",
         );
 
-        return $units->where('name', Str::title($chosen))->pluck('id')->first();
+        return $units->firstWhere('name', Str::title($chosen));
     }
 
     private function selectAmount(): int
@@ -55,10 +55,11 @@ class Train extends Command
         return $this->ask('How many? (0=all) ', 0);
     }
 
-    private function train(User $user, int $unit, int $amount): void
+    private function train(User $user, array $unit, int $amount): void
     {
         $response = $this->nightlands->resources($user->getLastIssuedToken())->get();
         $citizens = $response->getCitizens();
+        $gold = $response->getGold();
 
         $amount = $amount === 0 ? $citizens : $amount;
 
@@ -71,9 +72,23 @@ class Train extends Command
             $amount = $citizens;
         }
 
+        // Buy items
+        try {
+            collect($unit['items'])
+                ->keyBy('id')
+                ->map(fn(array $item) => $item['price'] * $amount)
+                ->filter(fn(int $price) => $gold < $price)
+                ->each(fn(int $price, int $itemId) => $this->nightlands->items($user->getLastIssuedToken())->buy(
+                    $itemId,
+                    $amount
+                ));
+        } catch (RequestFailed $exception) {
+            $this->userInfo($user, "Failed buying all items needed.");
+        }
+
         try {
             $this->nightlands->units($user->getLastIssuedToken())->train(
-                $unit,
+                (int) $unit['id'],
                 $amount,
             );
 
