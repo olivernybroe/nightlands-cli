@@ -45,6 +45,9 @@ class Attack extends Command
             }
 
             $this->userInfo($user, "Successfully attacked!");
+            $unitLost = collect($response->attackerCasualties())
+                ->map->getKilled()->count();
+            $this->userInfo($user, "lost {$unitLost} units.");
 
             $goldStolen += $response->goldStolen();
             return collect($response->defenderCasualties());
