@@ -29,7 +29,7 @@ class Scoreboard extends Command
                     'id' => $rank['id'],
                 ],
                 [
-                    'name' => $rank['username'],
+                    'name' => $rank['username'] ?? '',
                     'rank' => $rank['ranking'],
                 ]
             ));
